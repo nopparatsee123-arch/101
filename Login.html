@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เข้าสู่ระบบ — สมุดบันทึก</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #1F2A44;
+    --paper: #FAF7F2;
+    --clay: #C7623D;
+    --sage: #7A8B6F;
+    --line: #DCD4C4;
+    --grey: #6B6F76;
+  }
+  * { box-sizing: border-box; }
+  body{
+    margin:0;
+    min-height:100vh;
+    background:var(--paper);
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px);
+    background-size: 100% 2.1em;
+    font-family:'Sarabun', sans-serif;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .card{
+    width:100%;
+    max-width:380px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-left:4px solid var(--clay);
+    padding:36px 32px;
+    box-shadow: 0 1px 0 rgba(31,42,68,0.04);
+  }
+  .mark{
+    font-size:13px;
+    color:var(--sage);
+    font-weight:600;
+    margin:0 0 4px;
+    letter-spacing:0.02em;
+  }
+  h1{
+    font-size:26px;
+    margin:0 0 28px;
+    font-weight:700;
+    line-height:1.3;
+  }
+  .field{ margin-bottom:16px; }
+  label{
+    display:block;
+    font-size:14px;
+    font-weight:600;
+    margin-bottom:6px;
+    color:var(--grey);
+  }
+  input{
+    width:100%;
+    padding:11px 12px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    font-family:inherit;
+    font-size:15px;
+    color:var(--ink);
+  }
+  input:focus{
+    outline:2px solid var(--sage);
+    outline-offset:1px;
+    background:#fff;
+  }
+  button{
+    width:100%;
+    padding:12px;
+    margin-top:8px;
+    background:var(--ink);
+    color:#fff;
+    border:none;
+    font-family:inherit;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  button:hover{ background:#141c30; }
+  button:disabled{ opacity:0.55; cursor:not-allowed; }
+  .switch{
+    text-align:center;
+    margin-top:20px;
+    font-size:14px;
+    color:var(--grey);
+  }
+  .switch a{ color:var(--clay); font-weight:600; text-decoration:none; }
+  .switch a:hover{ text-decoration:underline; }
+  .msg{
+    font-size:13.5px;
+    padding:10px 12px;
+    margin-bottom:16px;
+    display:none;
+    border-left:3px solid var(--clay);
+    background:#FBEDE7;
+    color:#8C3A1F;
+  }
+  .msg.show{ display:block; }
+</style>
+</head>
+<body>
+
+  <div class="card">
+    <p class="mark">สมุดบันทึกส่วนตัว</p>
+    <h1 id="formTitle">เข้าสู่ระบบ</h1>
+
+    <div class="msg" id="msg"></div>
+
+    <form id="authForm">
+      <div class="field">
+        <label for="email">อีเมล</label>
+        <input type="email" id="email" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label for="password">รหัสผ่าน</label>
+        <input type="password" id="password" required autocomplete="current-password" minlength="6">
+      </div>
+      <button type="submit" id="submitBtn">เข้าสู่ระบบ</button>
+    </form>
+
+    <p class="switch">
+      ยังไม่มีบัญชี? <a href="#" id="toggleMode">สมัครสมาชิก</a>
+    </p>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <script>
+    let isRegisterMode = false;
+
+    const form = document.getElementById('authForm');
+    const toggleLink = document.getElementById('toggleMode');
+    const formTitle = document.getElementById('formTitle');
+    const submitBtn = document.getElementById('submitBtn');
+    const msg = document.getElementById('msg');
+
+    // ถ้า login อยู่แล้ว ให้ไปหน้าแอปเลย
+    auth.onAuthStateChanged(user => {
+      if (user) window.location.href = 'app.html';
+    });
+
+    toggleLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      isRegisterMode = !isRegisterMode;
+      formTitle.textContent = isRegisterMode ? 'สมัครสมาชิก' : 'เข้าสู่ระบบ';
+      submitBtn.textContent = isRegisterMode ? 'สมัครสมาชิก' : 'เข้าสู่ระบบ';
+      toggleLink.textContent = isRegisterMode ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก';
+      document.querySelector('.switch').firstChild.textContent =
+        isRegisterMode ? 'มีบัญชีอยู่แล้ว? ' : 'ยังไม่มีบัญชี? ';
+      hideMsg();
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideMsg();
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'กำลังดำเนินการ...';
+
+      try {
+        if (isRegisterMode) {
+          await auth.createUserWithEmailAndPassword(email, password);
+        } else {
+          await auth.signInWithEmailAndPassword(email, password);
+        }
+        // onAuthStateChanged จะพาไปหน้า app.html เอง
+      } catch (err) {
+        showMsg(translateError(err.code));
+        submitBtn.disabled = false;
+        submitBtn.textContent = isRegisterMode ? 'สมัครสมาชิก' : 'เข้าสู่ระบบ';
+      }
+    });
+
+    function showMsg(text){
+      msg.textContent = text;
+      msg.classList.add('show');
+    }
+    function hideMsg(){
+      msg.classList.remove('show');
+    }
+
+    function translateError(code){
+      const map = {
+        'auth/email-already-in-use': 'อีเมลนี้ถูกใช้สมัครไปแล้ว',
+        'auth/invalid-email': 'รูปแบบอีเมลไม่ถูกต้อง',
+        'auth/weak-password': 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร',
+        'auth/user-not-found': 'ไม่พบบัญชีนี้ ลองสมัครสมาชิกก่อน',
+        'auth/wrong-password': 'รหัสผ่านไม่ถูกต้อง',
+        'auth/invalid-credential': 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
+        'auth/too-many-requests': 'ลองผิดหลายครั้งเกินไป กรุณารอสักครู่'
+      };
+      return map[code] || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+    }
+  </script>
+
+</body>
+</html>
