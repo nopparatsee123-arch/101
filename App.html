@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>สมุดบันทึกของฉัน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #1F2A44;
+    --paper: #FAF7F2;
+    --clay: #C7623D;
+    --sage: #7A8B6F;
+    --line: #DCD4C4;
+    --grey: #6B6F76;
+  }
+  * { box-sizing: border-box; }
+  body{
+    margin:0;
+    min-height:100vh;
+    background:var(--paper);
+    background-image: linear-gradient(var(--line) 1px, transparent 1px);
+    background-size: 100% 2.1em;
+    font-family:'Sarabun', sans-serif;
+    color:var(--ink);
+  }
+  header{
+    background:var(--ink);
+    color:#fff;
+    padding:18px 24px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  header .brand{ font-weight:700; font-size:17px; }
+  header .brand span{ color:#C9B79C; font-weight:400; font-size:13px; display:block; margin-top:2px;}
+  header .userbox{ display:flex; align-items:center; gap:14px; font-size:13.5px; }
+  header .userbox #userEmail{ color:#C9B79C; }
+  header button{
+    background:transparent;
+    border:1px solid #4A567A;
+    color:#fff;
+    padding:7px 14px;
+    font-family:inherit;
+    font-size:13.5px;
+    cursor:pointer;
+  }
+  header button:hover{ background:#2A3552; }
+
+  main{
+    max-width:920px;
+    margin:0 auto;
+    padding:32px 24px 60px;
+  }
+
+  .panel{
+    background:#fff;
+    border:1px solid var(--line);
+    padding:28px;
+    margin-bottom:28px;
+  }
+  .panel h2{
+    font-size:18px;
+    margin:0 0 20px;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .row{ display:flex; gap:14px; flex-wrap:wrap; }
+  .field{ margin-bottom:16px; flex:1; min-width:180px; }
+  label{
+    display:block;
+    font-size:13.5px;
+    font-weight:600;
+    margin-bottom:6px;
+    color:var(--grey);
+  }
+  input[type=text], select{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    font-family:inherit;
+    font-size:14.5px;
+    color:var(--ink);
+  }
+  input[type=text]:focus, select:focus{
+    outline:2px solid var(--sage);
+    outline-offset:1px;
+    background:#fff;
+  }
+  .filedrop{
+    border:1.5px dashed var(--line);
+    padding:16px;
+    text-align:center;
+    font-size:13.5px;
+    color:var(--grey);
+    background:var(--paper);
+    cursor:pointer;
+  }
+  .filedrop:hover{ border-color:var(--sage); }
+  .filedrop input{ display:none; }
+  #fileNames{ margin-top:8px; font-size:13px; color:var(--sage); }
+
+  button.primary{
+    padding:12px 20px;
+    background:var(--clay);
+    color:#fff;
+    border:none;
+    font-family:inherit;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  button.primary:hover{ background:#A94F32; }
+  button.primary:disabled{ opacity:0.5; cursor:not-allowed; }
+
+  .progress-wrap{ margin-top:14px; display:none; }
+  .progress-wrap.show{ display:block; }
+  .progress-bar{ height:6px; background:var(--line); overflow:hidden; }
+  .progress-bar > div{ height:100%; background:var(--sage); width:0%; transition:width .2s; }
+  .progress-label{ font-size:12.5px; color:var(--grey); margin-top:4px; }
+
+  .item{
+    border:1px solid var(--line);
+    border-left:3px solid var(--sage);
+    padding:16px 18px;
+    margin-bottom:12px;
+    background:#fff;
+  }
+  .item-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+  .item-title{ font-weight:700; font-size:15.5px; }
+  .item-cat{
+    display:inline-block;
+    font-size:12px;
+    color:var(--sage);
+    font-weight:600;
+    margin-top:3px;
+  }
+  .item-note{ font-size:14px; color:var(--grey); margin-top:8px; line-height:1.5; }
+  .item-files{ margin-top:10px; display:flex; flex-wrap:wrap; gap:8px; }
+  .item-files a{
+    font-size:12.5px;
+    color:var(--ink);
+    text-decoration:none;
+    border:1px solid var(--line);
+    padding:5px 10px;
+    background:var(--paper);
+  }
+  .item-files a:hover{ border-color:var(--clay); color:var(--clay); }
+  .item-files img{
+    width:72px; height:72px; object-fit:cover;
+    border:1px solid var(--line);
+    display:block;
+  }
+  .btn-delete{
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--grey);
+    padding:6px 12px;
+    font-family:inherit;
+    font-size:13px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .btn-delete:hover{ border-color:#C0392B; color:#C0392B; }
+
+  .empty{
+    text-align:center;
+    color:var(--grey);
+    font-size:14px;
+    padding:30px 0;
+  }
+  .setup-warning{
+    background:#FBEDE7;
+    border-left:3px solid var(--clay);
+    color:#8C3A1F;
+    padding:12px 16px;
+    font-size:13.5px;
+    margin-bottom:24px;
+    display:none;
+  }
+  .setup-warning.show{ display:block; }
+</style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">สมุดบันทึกของฉัน<span>ข้อมูลของแต่ละคนแยกกัน ไม่ปนกัน</span></div>
+    <div class="userbox">
+      <span id="userEmail"></span>
+      <button id="logoutBtn">ออกจากระบบ</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="setup-warning" id="setupWarning">
+      ยังไม่ได้ใส่ค่า Firebase config — แก้ไฟล์ firebase-config.js ก่อนใช้งานจริง
+    </div>
+
+    <div class="panel">
+      <h2>บันทึกรายการใหม่</h2>
+      <form id="recordForm">
+        <div class="row">
+          <div class="field">
+            <label for="title">ชื่อรายการ / หัวข้อ</label>
+            <input type="text" id="title" placeholder="เช่น ซื้ออุปกรณ์คอมพิวเตอร์" required>
+          </div>
+          <div class="field">
+            <label for="category">หมวดหมู่</label>
+            <select id="category">
+              <option value="ทั่วไป">ทั่วไป</option>
+              <option value="การเงิน">การเงิน</option>
+              <option value="การเรียน/งาน">การเรียน/งาน</option>
+              <option value="ส่วนตัว">ส่วนตัว</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="note">รายละเอียดเพิ่มเติม</label>
+          <input type="text" id="note" placeholder="กรอกรายละเอียด (ถ้ามี)">
+        </div>
+        <div class="field">
+          <label>ไฟล์แนบ / รูปภาพ</label>
+          <label class="filedrop" for="fileInput">
+            คลิกเพื่อเลือกไฟล์ (เลือกได้หลายไฟล์)
+            <input type="file" id="fileInput" multiple>
+          </label>
+          <div id="fileNames"></div>
+        </div>
+
+        <div class="progress-wrap" id="progressWrap">
+          <div class="progress-bar"><div id="progressFill"></div></div>
+          <div class="progress-label" id="progressLabel">กำลังอัปโหลด...</div>
+        </div>
+
+        <button type="submit" class="primary" id="saveBtn" style="margin-top:16px;">บันทึกข้อมูล</button>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h2>รายการที่บันทึกไว้</h2>
+      <div id="itemList"></div>
+    </div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <script>
+    // เตือนถ้ายังไม่ได้ตั้งค่า config
+    if (firebaseConfig.apiKey === "ใส่ค่าของคุณตรงนี้") {
+      document.getElementById('setupWarning').classList.add('show');
+    }
+
+    let currentUser = null;
+
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+      currentUser = user;
+      document.getElementById('userEmail').textContent = user.email;
+      loadItems();
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      auth.signOut();
+    });
+
+    // แสดงชื่อไฟล์ที่เลือก
+    const fileInput = document.getElementById('fileInput');
+    fileInput.addEventListener('change', () => {
+      const names = Array.from(fileInput.files).map(f => f.name).join(', ');
+      document.getElementById('fileNames').textContent = names;
+    });
+
+    // บันทึกรายการใหม่
+    const form = document.getElementById('recordForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      const title = document.getElementById('title').value.trim();
+      const category = document.getElementById('category').value;
+      const note = document.getElementById('note').value.trim();
+      const files = Array.from(fileInput.files);
+
+      if (!title) return;
+
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'กำลังบันทึก...';
+
+      try {
+        const uploadedFiles = [];
+
+        if (files.length > 0) {
+          const progressWrap = document.getElementById('progressWrap');
+          const progressFill = document.getElementById('progressFill');
+          const progressLabel = document.getElementById('progressLabel');
+          progressWrap.classList.add('show');
+
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            progressLabel.textContent = `กำลังอัปโหลด ${file.name}...`;
+            progressFill.style.width = Math.round(((i) / files.length) * 100) + '%';
+
+            const uploaded = await uploadToCloudinary(file);
+            uploadedFiles.push({
+              name: file.name,
+              url: uploaded.secure_url,
+              isImage: file.type.startsWith('image/')
+            });
+
+            progressFill.style.width = Math.round(((i + 1) / files.length) * 100) + '%';
+          }
+          progressWrap.classList.remove('show');
+        }
+
+        await db.collection('users').doc(currentUser.uid).collection('items').add({
+          title, category, note,
+          files: uploadedFiles,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        form.reset();
+        document.getElementById('fileNames').textContent = '';
+        loadItems();
+      } catch (err) {
+        alert('เกิดข้อผิดพลาด: ' + err.message);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'บันทึกข้อมูล';
+      }
+    });
+
+    // โหลดรายการของผู้ใช้คนนี้เท่านั้น
+    async function loadItems() {
+      const listEl = document.getElementById('itemList');
+      listEl.innerHTML = '<div class="empty">กำลังโหลด...</div>';
+
+      const snap = await db.collection('users').doc(currentUser.uid)
+        .collection('items').orderBy('createdAt', 'desc').get();
+
+      if (snap.empty) {
+        listEl.innerHTML = '<div class="empty">ยังไม่มีข้อมูลที่บันทึกไว้</div>';
+        return;
+      }
+
+      listEl.innerHTML = '';
+      snap.forEach(doc => {
+        const item = doc.data();
+        const el = document.createElement('div');
+        el.className = 'item';
+
+        const filesHtml = (item.files || []).map(f => {
+          if (f.isImage) {
+            return `<a href="${f.url}" target="_blank" rel="noopener"><img src="${f.url}" alt="${escapeHtml(f.name)}"></a>`;
+          }
+          return `<a href="${f.url}" target="_blank" rel="noopener">📎 ${escapeHtml(f.name)}</a>`;
+        }).join('');
+
+        el.innerHTML = `
+          <div class="item-top">
+            <div>
+              <div class="item-title">${escapeHtml(item.title)}</div>
+              <span class="item-cat">${escapeHtml(item.category)}</span>
+            </div>
+            <button class="btn-delete" data-id="${doc.id}">ลบ</button>
+          </div>
+          ${item.note ? `<div class="item-note">${escapeHtml(item.note)}</div>` : ''}
+          ${filesHtml ? `<div class="item-files">${filesHtml}</div>` : ''}
+        `;
+        listEl.appendChild(el);
+      });
+
+      // ผูกปุ่มลบ
+      document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', () => deleteItem(btn.dataset.id));
+      });
+    }
+
+    async function deleteItem(id) {
+      if (!confirm('ต้องการลบรายการนี้ใช่หรือไม่?')) return;
+      await db.collection('users').doc(currentUser.uid).collection('items').doc(id).delete();
+      loadItems();
+    }
+
+    // ป้องกัน XSS: แปลงข้อความก่อนแสดงผล
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str || '';
+      return div.innerHTML;
+    }
+
+    // อัปโหลดไฟล์ไปยัง Cloudinary (แทน Firebase Storage)
+    async function uploadToCloudinary(file) {
+      const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`;
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      formData.append('folder', `users/${currentUser.uid}`);
+
+      const res = await fetch(url, { method: 'POST', body: formData });
+      if (!res.ok) {
+        throw new Error('อัปโหลดไฟล์ไม่สำเร็จ: ' + file.name);
+      }
+      return res.json();
+    }
+  </script>
+
+</body>
+</html>
